@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "apify-client>=1.12.1",
     "beautifulsoup4>=4.13.4",
+    "cdp-sdk>=1.29.1",
     "celery[redis]>=5.5.3",
     "fastapi[standard]>=0.116.1",
     "google-api-python-client>=2.177.0",

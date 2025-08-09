@@ -7,6 +7,7 @@ import { supabase } from "@/core/supabase"
 import { cleanUrl, cn, formatPrice } from "@/lib/utils"
 import type { User } from "@supabase/supabase-js"
 import {
+  DollarSignIcon,
   EyeIcon,
   EyeOffIcon,
   Loader2Icon,
@@ -17,7 +18,9 @@ import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 import { Storage } from "@plasmohq/storage"
+import { signOut } from '@coinbase/cdp-core';
 import { useStorage } from "@plasmohq/storage/hook"
+import { useEvmAddress, useSendEvmTransaction } from "@coinbase/cdp-hooks"
 
 function generateMockPriceHistory(currentPrice: number) {
   const history = []
@@ -44,6 +47,17 @@ function generateMockPriceHistory(currentPrice: number) {
 function generateMockPreviousPrice(currentPrice: number) {
   const changePercent = (Math.random() - 0.5) * 0.4
   return Math.round(currentPrice * (1 - changePercent) * 100) / 100
+}
+
+function priceToWei(priceInUSD: number): bigint {
+  const fractionPrice = priceInUSD / 10000
+  
+  const ethPrice = fractionPrice / 3000
+  
+  const weiAmount = Math.floor(ethPrice * Math.pow(10, 18))
+  
+  const minWei = 1000000000000n
+  return BigInt(Math.max(weiAmount, Number(minWei)))
 }
 
 export function Wishlist({
@@ -80,6 +94,12 @@ export function Wishlist({
   const [error, setError] = useState<string | null>(null)
   const [processingItems, setProcessingItems] = useState<Set<string>>(new Set())
   const [favoriteItems, setFavoriteItems] = useState<Set<string>>(new Set())
+  const [transactionHash, setTransactionHash] = useState<string>("")
+  const [transactionError, setTransactionError] = useState<string>("")
+  const [activeTransactionItem, setActiveTransactionItem] = useState<string | null>(null)
+  
+  const { evmAddress } = useEvmAddress()
+  const { sendEvmTransaction } = useSendEvmTransaction()
 
   const refreshData = () => {
     setLoading(true)
@@ -140,6 +160,7 @@ export function Wishlist({
 
   const handleLogout = async () => {
     try {
+      await signOut();
       await supabase.auth.signOut()
       removeItems()
       removeWishlistId()
@@ -211,6 +232,46 @@ export function Wishlist({
       }
     } catch {
       setError("An error occurred while updating favorites.")
+    }
+  }
+
+  const handleCartClick = async (item: any) => {
+    if (!evmAddress) {
+      setError("Please connect your wallet first.")
+      return
+    }
+
+    if (!item.price) {
+      setError("Item price not available for transaction.")
+      return
+    }
+
+    setActiveTransactionItem(item.id)
+    setTransactionError("")
+    setTransactionHash("")
+
+    try {
+      const transactionValue = priceToWei(item.price)
+      
+      const result = await sendEvmTransaction({
+        transaction: {
+          to: evmAddress,
+          value: transactionValue,
+          gas: 21000n,
+          chainId: 84532,
+          type: "eip1559",
+        },
+        evmAccount: evmAddress,
+        network: "base-sepolia",
+      })
+
+      setTransactionHash(result.transactionHash)
+      setTransactionError("")
+      console.log("Transaction successful:", result.transactionHash)
+    } catch (error) {
+      setTransactionHash("")
+      setTransactionError(error instanceof Error ? error.message : 'Unknown error')
+      console.error("Transaction failed:", error)
     }
   }
 
@@ -376,6 +437,31 @@ export function Wishlist({
               className="bg-blue-500 text-white hover:bg-blue-600">
               {extracting ? "Adding..." : "Add from page"}
             </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (!evmAddress) {
+                  setError("Please connect your wallet first.")
+                  return
+                }
+                
+                try {
+                  const response = await sendToBackground({
+                    name: "onramp",
+                    body: { address: evmAddress }
+                  })
+                  if (response.success) {
+                    window.open(response.data, "_blank")
+                  } else {
+                    setError(response.error || "Onramp request failed")
+                  }
+                } catch (error) {
+                  setError("Failed to send onramp request")
+                  console.error("Onramp error:", error)
+                }
+              }}>
+              <DollarSignIcon className="h-4 w-4" />
+            </Button>
             <Settings handleLogout={handleLogout} />
           </div>
         </div>
@@ -474,11 +560,8 @@ export function Wishlist({
                       </button>
                       <button
                         className="h-4 w-4 text-gray-400 transition-colors hover:text-gray-600"
-                        title="Add to cart"
-                        onClick={() => {
-                          // TODO: Implement add to cart functionality
-                          console.log("Add to cart:", item.id)
-                        }}>
+                        title="Add to cart (1/100th price transaction)"
+                        onClick={() => handleCartClick(item)}>
                         <ShoppingCartIcon className="h-4 w-4" />
                       </button>
                       <button
@@ -488,6 +571,61 @@ export function Wishlist({
                         <Trash2Icon className="h-4 w-4" />
                       </button>
                     </div>
+                  </div>
+                )}
+                
+                {/* Transaction Processing */}
+                {activeTransactionItem === item.id && !transactionHash && !transactionError && (
+                  <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3">
+                    <div className="mb-2 text-sm font-medium text-blue-900">
+                      Processing Transaction (${formatPrice(item.price / 100)})
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <Loader2Icon className="h-4 w-4 animate-spin text-blue-500" />
+                      <span className="ml-2 text-sm text-blue-700">Sending transaction...</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Transaction Hash Display */}
+                {transactionHash && activeTransactionItem === item.id && (
+                  <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3">
+                    <div className="mb-1 text-sm font-medium text-green-900">
+                      Transaction Sent!
+                    </div>
+                    <p className="text-sm text-green-700">
+                      Hash:{" "}
+                      <a
+                        href={`https://sepolia.basescan.org/tx/${transactionHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs underline hover:text-green-900"
+                      >
+                        {transactionHash.slice(0, 6)}...{transactionHash.slice(-4)}
+                      </a>
+                    </p>
+                    <button 
+                      onClick={() => {setTransactionHash(""); setActiveTransactionItem(null)}}
+                      className="mt-2 text-xs text-green-600 hover:text-green-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+
+                {/* Transaction Error Display */}
+                {transactionError && activeTransactionItem === item.id && (
+                  <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+                    <div className="mb-1 text-sm font-medium text-red-900">
+                      Transaction Failed
+                    </div>
+                    <p className="text-sm text-red-700">{transactionError}</p>
+                    <button 
+                      onClick={() => {setTransactionError(""); setActiveTransactionItem(null)}}
+                      className="mt-2 text-xs text-red-600 hover:text-red-800"
+                    >
+                      Close
+                    </button>
                   </div>
                 )}
               </div>
