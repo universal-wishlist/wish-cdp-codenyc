@@ -1,0 +1,24 @@
+[project]
+name = "wish-core-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apify-client>=1.12.1",
+    "beautifulsoup4>=4.13.4",
+    "celery[redis]>=5.5.3",
+    "fastapi[standard]>=0.116.1",
+    "google-api-python-client>=2.177.0",
+    "httpx>=0.28.1",
+    "langchain-openai>=0.3.28",
+    "langsmith>=0.4.9",
+    "openai>=1.98.0",
+    "playwright>=1.54.0",
+    "pycountry>=24.6.1",
+    "pydantic>=2.11.7",
+    "pydantic-extra-types>=2.10.5",
+    "pydantic-settings>=2.10.1",
+    "slowapi>=0.1.9",
+    "supabase>=2.17.0",
+]
