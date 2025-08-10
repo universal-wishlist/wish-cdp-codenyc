@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Request
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,8 +63,10 @@ app.middleware("http")(
 def health_check():
     return {"status": "ok"}
 
-@app.get("/query")
-async def get_query():
+@app.post("/query")
+async def get_query(request: Request):
+    data = await request.json()
+    print(data)
     return {
         "report": {
             "weather": "sunny",
