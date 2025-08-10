@@ -24,6 +24,7 @@
     }
   },
   "globalEnv": [
+    "BACKEND_URL",
     "CDP_API_KEY_ID",
     "CDP_API_KEY_SECRET",
     "CDP_PRIVATE_KEY",
