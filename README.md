@@ -74,6 +74,7 @@ graph TB
 #### **Payments & Blockchain**
 
 - **Coinbase CDP SDK** - Wallet and account management
+- **CDP Data SQL API** - Real-time blockchain analytics and insights
 - **x402 Protocol** - HTTP micropayment standard
 - **Base Sepolia** - Ethereum L2 testnet
 - **Smart Contract Integration** - Automated payment processing
@@ -97,7 +98,7 @@ graph TB
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/your-username/wish-cdp-codenyc.git
+git clone https://github.com/0xtotaylor/wish-cdp-codenyc.git
 cd wish-cdp-codenyc
 
 # Install all dependencies
@@ -141,9 +142,14 @@ APP_ENV=development
 #### **Next.js Frontend** (`apps/nextjs/.env.local`)
 
 ```bash
+# CDP SDK & Data API
 CDP_API_KEY_ID=your_cdp_api_key_id
 CDP_API_KEY_SECRET=your_cdp_api_secret
 CDP_WALLET_SECRET=your_wallet_secret
+
+# Analytics Configuration
+WISH_WALLET_ADDRESS=0x_your_wish_wallet_address
+NEXT_PUBLIC_WISH_WALLET_ADDRESS=0x_your_wish_wallet_address
 ```
 
 #### **Plasmo Extension** (`apps/plasmo/.env`)
@@ -167,6 +173,7 @@ This will launch:
 
 - **FastAPI Backend**: http://localhost:8000
 - **Next.js Frontend**: http://localhost:3000
+- **Analytics Dashboard**: http://localhost:3000/admin
 - **Plasmo Extension**: Hot-reload in Chrome
 
 ### 4. Load Chrome Extension
@@ -222,13 +229,47 @@ const response = await fetchWithPayment("/api/query", {
 - **💰 Merchant Insights**: Retailers query wishlist data via micropayments
 - **⚡ Instant Payments**: Real-time transaction processing via CDP
 - **🔒 Secure & Transparent**: All payments recorded on Base blockchain
+- **📊 Real-time Analytics**: CDP Data SQL API provides instant payment insights
 
 ### 🏪 Retailer Intelligence Dashboard
 
 - **🎯 Product Performance**: Query specific products across all wishlists
-- **📊 Demand Insights**: Real-time data on consumer interest
+- **📊 Demand Insights**: Real-time data on consumer interest powered by CDP Data API
 - **💡 Pricing Optimization**: Data-driven discount and pricing strategies
 - **🔄 Intent Conversion**: Turn wishlist interest into actual sales
+- **📈 Blockchain Analytics**: Live payment tracking and revenue insights
+- **👥 User Behavior Analysis**: Top customer identification and spending patterns
+
+## 📊 CDP Data SQL Analytics
+
+Wish leverages Coinbase's powerful CDP Data API to provide real-time blockchain analytics and insights:
+
+### **Real-time Payment Tracking**
+
+```sql
+SELECT
+  toDate(fromUnixTimestamp(block_timestamp)) as date,
+  COUNT(*) as transactions,
+  SUM(toFloat64(value) / 1e18) as revenue_eth
+FROM base_sepolia.transactions
+WHERE to_address = 'your_wish_wallet'
+  AND value > 0
+GROUP BY date
+ORDER BY date DESC;
+```
+
+### **User Analytics Dashboard**
+
+- **📈 Daily Revenue Trends**: Track ETH earnings from wishlist insights
+- **👥 Top User Identification**: Find your most valuable data contributors
+- **⚡ Live Transaction Monitoring**: Real-time payment notifications
+- **🔍 Custom Query Interface**: Execute custom SQL queries against blockchain data
+
+### **Available Analytics Endpoints**
+
+- `GET /api/analytics` - Complete dashboard data
+- `POST /api/analytics` - Custom SQL query execution
+- `GET /api/analytics/test` - API connectivity testing
 
 ## 🔍 API Endpoints
 
@@ -346,6 +387,8 @@ docker-compose up --build
 - **💳 Onramp API Integration**: Easy wallet funding within the extension
 - **⚡ x402 Micropayments**: Novel revenue sharing model for user data
 - **🏗️ CDP SDK**: Robust wallet and account management infrastructure
+- **📊 CDP Data SQL API**: Real-time blockchain analytics and payment insights
+- **🔍 Advanced Query Engine**: Execute complex SQL queries against Base blockchain data
 
 ### 💡 Solving Real Consumer Pain Points
 
@@ -367,6 +410,8 @@ docker-compose up --build
 - **💰 Sustainable Model**: Revenue sharing creates aligned incentives
 - **🚀 Scalable Architecture**: Ready for millions of users and transactions
 - **🔒 Privacy-First**: Users control their data and earn from it
+- **📈 Data-Driven Insights**: CDP Data API enables sophisticated analytics and business intelligence
+- **⚡ Real-time Intelligence**: Instant payment tracking and user behavior analysis
 
 ### Development Workflow
 
@@ -379,13 +424,3 @@ docker-compose up --build
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-
-**🌟 Built with ❤️ for the future of e-commerce intelligence**
-
-[Demo](https://youtu.be/ADvBemUthYo)
-
-</div>
