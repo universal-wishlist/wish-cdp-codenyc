@@ -31,6 +31,7 @@ export function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDemoData, setIsDemoData] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();
@@ -46,37 +47,45 @@ export function AnalyticsDashboard() {
       
       if (data.success) {
         setAnalytics(data.analytics);
+        setIsDemoData(false);
       } else {
         // Show demo data when API is not configured
         console.log('Analytics API not configured, showing demo data');
         setAnalytics(getDemoAnalytics());
+        setIsDemoData(true);
       }
     } catch (err) {
       // Show demo data on network error
       console.log('Network error, showing demo data');
       setAnalytics(getDemoAnalytics());
+      setIsDemoData(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to safely get date string
+  const getDateString = (date: Date): string => {
+    return date.toISOString().split('T')[0] || date.toDateString();
   };
 
   // Demo data for when API is not configured
   const getDemoAnalytics = (): AnalyticsData => ({
     dailyRevenue: [
       {
-        payment_date: new Date().toISOString().split('T')[0],
+        payment_date: getDateString(new Date()),
         transactions_count: 15,
         daily_revenue_eth: 0.015,
         unique_users: 8
       },
       {
-        payment_date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+        payment_date: getDateString(new Date(Date.now() - 86400000)),
         transactions_count: 22,
         daily_revenue_eth: 0.022,
         unique_users: 12
       },
       {
-        payment_date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
+        payment_date: getDateString(new Date(Date.now() - 172800000)),
         transactions_count: 18,
         daily_revenue_eth: 0.018,
         unique_users: 9
@@ -157,7 +166,7 @@ export function AnalyticsDashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Payment Analytics</h2>
-          {analytics === getDemoAnalytics() && (
+          {isDemoData && (
             <p className="text-sm text-amber-600 mt-1">
               ⚠️ Showing demo data - CDP Data API not configured
             </p>
