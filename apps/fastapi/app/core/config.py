@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     AZURE_OPENAI_API_KEY: str
     AZURE_OPENAI_ENDPOINT: str
     APP_ENV: str = "dev"
+    CDP_API_KEY_ID: str
+    CDP_API_KEY_SECRET: str
     GOOGLE_API_KEY: str
     GOOGLE_CUSTOM_SEARCH_ENGINE_ID: str
     LANGSMITH_API_KEY: str
@@ -20,6 +22,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     SUPABASE_URL: str
     SUPABASE_SERVICE_ROLE_KEY: str
+    WISH_WALLET: str
 
     model_config = SettingsConfigDict(env_file=".env", extra='ignore')
 

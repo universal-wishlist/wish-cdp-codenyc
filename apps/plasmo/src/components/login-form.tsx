@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import type { User } from "@supabase/supabase-js"
 import { useEffect, useState } from "react"
 
+import { useSignInWithEmail, useVerifyEmailOTP } from "@coinbase/cdp-hooks";
+
 import { sendToBackground } from "@plasmohq/messaging"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
@@ -26,6 +28,12 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState<"LOGIN" | "SIGNUP">("LOGIN")
+  
+  const { signInWithEmail } = useSignInWithEmail()
+  const { verifyEmailOTP } = useVerifyEmailOTP()
+  const [cdpFlowId, setCdpFlowId] = useState<string | null>(null)
+  const [showOtpInput, setShowOtpInput] = useState(false)
+  const [otp, setOtp] = useState("")
 
   useEffect(() => {
     async function init() {
@@ -93,7 +101,6 @@ export function LoginForm({
       if (user) {
         setUser(user)
 
-        // Initialize session with the tokens
         const { data } = await supabase.auth.getSession()
         if (data.session) {
           sendToBackground({
@@ -107,6 +114,50 @@ export function LoginForm({
       }
     } catch (error) {
       alert("OAuth error: " + (error as any).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCdpSignIn = async () => {
+    if (!email) {
+      alert("Please enter an email address")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { flowId } = await signInWithEmail({ email })
+      setCdpFlowId(flowId)
+      setShowOtpInput(true)
+    } catch (error) {
+      alert("CDP sign-in error: " + (error as any).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    if (!cdpFlowId || !otp) {
+      alert("Please enter the OTP code")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { user } = await verifyEmailOTP({
+        flowId: cdpFlowId,
+        otp
+      })
+      
+      if (user) {
+        alert("CDP authentication successful!")
+        setShowOtpInput(false)
+        setCdpFlowId(null)
+        setOtp("")
+      }
+    } catch (error) {
+      alert("OTP verification error: " + (error as any).message)
     } finally {
       setLoading(false)
     }
@@ -174,14 +225,62 @@ export function LoginForm({
                     ? "Login"
                     : "Sign up"}
               </Button>
-              <Button
+              {/* <Button
                 type="button"
                 onClick={handleOAuthLogin}
                 variant="outline"
                 className="w-full"
                 disabled={loading}>
                 Login with Google
-              </Button>
+              </Button> */}
+              
+              {/* CDP Authentication Section */}
+              <div className="border-t pt-4 mt-4">
+                {!showOtpInput ? (
+                  <Button
+                    type="button"
+                    onClick={handleCdpSignIn}
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading || !email}>
+                    Sign in with Coinbase
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="otp">Enter OTP Code</Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder="123456"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        autoComplete="one-time-code"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        className="flex-1"
+                        disabled={loading || !otp}>
+                        {loading ? "Verifying..." : "Verify OTP"}
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setShowOtpInput(false)
+                          setCdpFlowId(null)
+                          setOtp("")
+                        }}
+                        variant="outline"
+                        disabled={loading}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="mt-4 text-center text-sm">
               {mode === "LOGIN" ? (
