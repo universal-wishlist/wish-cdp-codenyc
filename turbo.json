@@ -1,18 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {},
     "dev": {
@@ -26,17 +18,15 @@
       "cache": false
     },
     "start": {
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "cache": false,
       "persistent": true
     }
   },
   "globalEnv": [
-    "PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    "CLERK_SECRET_KEY",
-    "NODE_ENV",
-    "PLASMO_PUBLIC_DEV_PORT"
+    "CDP_API_KEY_ID",
+    "CDP_API_KEY_SECRET",
+    "CDP_PRIVATE_KEY",
+    "CDP_WALLET_SECRET"
   ]
 }
