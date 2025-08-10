@@ -5,12 +5,12 @@
 declare module 'x402-fetch' {
   export interface PaymentResponse {
     transaction?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export function wrapFetchWithPayment(
     fetchFunction: typeof fetch,
-    account: any
+    account: unknown
   ): typeof fetch;
 
   export function decodeXPaymentResponse(

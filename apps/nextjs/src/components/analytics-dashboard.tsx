@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface AnalyticsData {
   dailyRevenue: Array<{
@@ -33,44 +33,13 @@ export function AnalyticsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [isDemoData, setIsDemoData] = useState(false);
 
-  useEffect(() => {
-    fetchAnalytics();
+  // Helper function to safely get date string
+  const getDateString = useCallback((date: Date): string => {
+    return date.toISOString().split('T')[0] || date.toDateString();
   }, []);
 
-  const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await fetch('/api/analytics');
-      const data = await response.json();
-      
-      if (data.success) {
-        setAnalytics(data.analytics);
-        setIsDemoData(false);
-      } else {
-        // Show demo data when API is not configured
-        console.log('Analytics API not configured, showing demo data');
-        setAnalytics(getDemoAnalytics());
-        setIsDemoData(true);
-      }
-    } catch (err) {
-      // Show demo data on network error
-      console.log('Network error, showing demo data');
-      setAnalytics(getDemoAnalytics());
-      setIsDemoData(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper function to safely get date string
-  const getDateString = (date: Date): string => {
-    return date.toISOString().split('T')[0] || date.toDateString();
-  };
-
   // Demo data for when API is not configured
-  const getDemoAnalytics = (): AnalyticsData => ({
+  const getDemoAnalytics = useCallback((): AnalyticsData => ({
     dailyRevenue: [
       {
         payment_date: getDateString(new Date()),
@@ -117,7 +86,38 @@ export function AnalyticsDashboard() {
         total_paid_eth: 0.018
       }
     ]
-  });
+  }), [getDateString]);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/analytics');
+      const data = await response.json() as { success?: boolean; analytics?: AnalyticsData };
+      
+      if (data.success) {
+        setAnalytics(data.analytics || null);
+        setIsDemoData(false);
+      } else {
+        // Show demo data when API is not configured
+        console.log('Analytics API not configured, showing demo data');
+        setAnalytics(getDemoAnalytics());
+        setIsDemoData(true);
+      }
+    } catch {
+      // Show demo data on network error
+      console.log('Network error, showing demo data');
+      setAnalytics(getDemoAnalytics());
+      setIsDemoData(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [getDemoAnalytics]);
+
+  useEffect(() => {
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (loading) {
     return (
@@ -141,7 +141,7 @@ export function AnalyticsDashboard() {
           <h3 className="font-semibold">Error loading analytics</h3>
           <p className="text-sm mt-1">{error}</p>
           <button 
-            onClick={fetchAnalytics}
+            onClick={() => void fetchAnalytics()}
             className="mt-2 text-sm bg-red-100 hover:bg-red-200 px-3 py-1 rounded"
           >
             Retry
@@ -173,7 +173,7 @@ export function AnalyticsDashboard() {
           )}
         </div>
         <button 
-          onClick={fetchAnalytics}
+          onClick={() => void fetchAnalytics()}
           className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
         >
           Refresh

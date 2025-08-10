@@ -3,7 +3,8 @@
  * Provides real-time payment and revenue analytics for Wish platform
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 interface PaymentAnalytics {
   dailyRevenue: Array<{
@@ -25,10 +26,14 @@ interface PaymentAnalytics {
   }>;
 }
 
+interface SQLResponse {
+  data?: unknown[];
+}
+
 /**
  * Execute SQL query against CDP Data API
  */
-async function executeSQL(query: string): Promise<any> {
+async function executeSQL(query: string): Promise<SQLResponse> {
   const response = await fetch("https://api.cdp.coinbase.com/platform/v2/data/query/run", {
     method: "POST",
     headers: {
@@ -44,13 +49,13 @@ async function executeSQL(query: string): Promise<any> {
     throw new Error(`SQL API error: ${response.statusText} - ${errorText}`);
   }
 
-  return await response.json();
+  return await response.json() as SQLResponse;
 }
 
 /**
  * GET handler for payment analytics
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const wishWalletAddress = process.env.WISH_WALLET_ADDRESS || process.env.NEXT_PUBLIC_WISH_WALLET_ADDRESS;
     
@@ -108,16 +113,16 @@ export async function GET(req: NextRequest) {
     `;
 
     // Execute queries in parallel
-    const [dailyRevenue, recentPayments, topUsers] = await Promise.all([
+    const [dailyRevenueResult, recentPaymentsResult, topUsersResult] = await Promise.all([
       executeSQL(dailyRevenueQuery),
       executeSQL(recentPaymentsQuery), 
       executeSQL(topUsersQuery),
     ]);
 
     const analytics: PaymentAnalytics = {
-      dailyRevenue: dailyRevenue.data || [],
-      recentPayments: recentPayments.data || [],
-      topUsers: topUsers.data || [],
+      dailyRevenue: (dailyRevenueResult.data || []) as PaymentAnalytics['dailyRevenue'],
+      recentPayments: (recentPaymentsResult.data || []) as PaymentAnalytics['recentPayments'],
+      topUsers: (topUsersResult.data || []) as PaymentAnalytics['topUsers'],
     };
 
     return NextResponse.json({
@@ -144,7 +149,7 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const { query, timeframe = '7d' } = await req.json();
+    const { query } = await req.json() as { query?: string };
     
     if (!query) {
       return NextResponse.json(

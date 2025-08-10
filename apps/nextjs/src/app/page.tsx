@@ -8,19 +8,20 @@
  * associated transaction information.
  */
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { Logo } from "../components/logo";
 import { AnalyticsDashboard } from "../components/analytics-dashboard";
 
 // Types for component state
 interface QueryResponse {
-  data: any;
+  data: unknown;
   transactionHash?: string;
 }
 
 interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   transactionHash?: string;
   error?: string;
 }
@@ -70,7 +71,7 @@ export default function Home() {
 
       let data: ApiResponse;
       try {
-        data = await res.json();
+        data = await res.json() as ApiResponse;
       } catch (parseError) {
         console.error("Failed to parse API response:", parseError);
         setError("Invalid response from server");
@@ -112,7 +113,7 @@ export default function Home() {
 
         <main className="space-y-6">
           {/* Query form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div>
               <label htmlFor="query" className="block text-sm font-medium text-white mb-2">
                 Product Query ({query.length}/1000 characters)
@@ -163,20 +164,20 @@ export default function Home() {
               
               {/* Formatted response display */}
               <div className="space-y-3">
-                {response.data?.wishlistInsights && (
+                {(response.data as { wishlistInsights?: Record<string, unknown> })?.wishlistInsights && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-medium">Total Wishlist Adds:</span>
-                        <p>{response.data.wishlistInsights.totalWishlistAdds?.toLocaleString()}</p>
+                        <p>{(response.data as { wishlistInsights?: { totalWishlistAdds?: number } })?.wishlistInsights?.totalWishlistAdds?.toLocaleString()}</p>
                       </div>
                       <div>
                         <span className="font-medium">Avg. Days on Wishlist:</span>
-                        <p>{response.data.wishlistInsights.averageDaysOnWishlist}</p>
+                        <p>{(response.data as { wishlistInsights?: { averageDaysOnWishlist?: number } })?.wishlistInsights?.averageDaysOnWishlist}</p>
                       </div>
                       <div>
                         <span className="font-medium">Conversion Rate:</span>
-                        <p>{response.data.wishlistInsights.conversionFromWishlist}%</p>
+                        <p>{(response.data as { wishlistInsights?: { conversionFromWishlist?: number } })?.wishlistInsights?.conversionFromWishlist}%</p>
                       </div>
                     </div>
                     

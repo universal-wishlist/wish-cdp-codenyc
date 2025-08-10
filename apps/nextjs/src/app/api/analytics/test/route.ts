@@ -2,9 +2,10 @@
  * Test route for CDP Data SQL API connectivity
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Simple test query to verify API access
     const testQuery = `
@@ -40,13 +41,13 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
     console.log("CDP API Response Data:", data);
 
     return NextResponse.json({
       success: true,
       message: "CDP Data API connectivity test successful",
-      data,
+      data: data,
       timestamp: new Date().toISOString(),
     });
 

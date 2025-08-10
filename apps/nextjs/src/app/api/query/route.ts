@@ -5,7 +5,8 @@
  * handling CDP wallet management and x402 payment protocol integration.
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { CdpClient } from "@coinbase/cdp-sdk";
 import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
 
@@ -16,7 +17,7 @@ interface QueryRequest {
 
 interface QueryResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   transactionHash?: string;
   error?: string;
 }
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<QueryResponse
     // Parse and validate request body
     let body: QueryRequest;
     try {
-      body = await req.json();
+      body = await req.json() as QueryRequest;
     } catch (parseError) {
       console.error("[Query API] Failed to parse request body:", parseError);
       return NextResponse.json(
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<QueryResponse
     // Parse backend response
     let responseData;
     try {
-      responseData = await response.json();
+      responseData = await response.json() as unknown;
     } catch (parseError) {
       console.error("[Query API] Failed to parse backend response:", parseError);
       return NextResponse.json(
@@ -164,7 +165,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<QueryResponse
       return NextResponse.json(
         { 
           success: false, 
-          error: responseData?.detail || "Backend service error" 
+          error: (responseData as { detail?: string })?.detail || "Backend service error" 
         },
         { status: response.status }
       );
@@ -203,7 +204,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<QueryResponse
       { 
         success: false, 
         error: process.env.NODE_ENV === 'development' 
-          ? `Internal server error: ${error}` 
+          ? `Internal server error: ${String(error)}` 
           : "Internal server error" 
       },
       { status: 500 }
