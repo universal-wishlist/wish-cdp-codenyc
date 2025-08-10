@@ -120,7 +120,7 @@ export default function Home() {
                 id="query"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter your product query here... (e.g., 'Best wireless headphones under $200')";
+                placeholder="Enter your product query here... (e.g., 'Best wireless headphones under $200')"
                 className="w-full p-4 border border-gray-300 rounded-lg resize-none h-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
                 disabled={loading}
                 maxLength={1000}
