@@ -4,6 +4,7 @@ from fastapi import FastAPI, status
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from fastapi.middleware.cors import CORSMiddleware
+from x402.fastapi.middleware import require_payment
 
 from app.core.config import settings
 from app.core.limiter import limiter
@@ -35,9 +36,41 @@ app.add_middleware(
 
 app.include_router(wishlist_router)
 
+app.middleware("http")(
+    require_payment(
+        path="/query",
+        price="$0.001",
+        network="base-sepolia",
+        pay_to_address=settings.WISH_WALLET,
+        description="Query Wish for consumer data",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "City name"}
+            }
+        },
+        output_schema={
+            "type": "object",
+            "properties": {
+                "weather": {"type": "string"},
+                "temperature": {"type": "number"}
+            }
+        }
+    )
+)
+
 @app.get("/health", status_code=status.HTTP_200_OK)
 def health_check():
     return {"status": "ok"}
+
+@app.get("/query")
+async def get_query():
+    return {
+        "report": {
+            "weather": "sunny",
+            "temperature": 70,
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
