@@ -1,41 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CdpClient } from "@coinbase/cdp-sdk";
-import { toAccount } from "viem/accounts";
-import {
-  wrapFetchWithPayment,
-  decodeXPaymentResponse,
-} from "x402-fetch/dist/cjs/index.js";
-
-const cdp = new CdpClient();
-const cdpAccount = await cdp.evm.createAccount();
-const account = toAccount(cdpAccount);
 
 export async function POST(req: NextRequest) {
   try {
-    const fetchWithPayment = wrapFetchWithPayment(fetch, account);
-    fetchWithPayment("http://localhost:8000/query", {
-      method: "POST",
-      body: JSON.stringify({
-        query: "What is the weather in Tokyo?",
-      }),
-    })
-      .then(async (response) => {
-        const body = await response.json();
-        console.log(body);
+    const body = await req.json();
+    const { query } = body;
 
-        const paymentResponse = decodeXPaymentResponse(
-          response.headers.get("x-payment-response")!
-        );
-        console.log(paymentResponse);
-      })
-      .catch((error) => {
-        console.error(error.response?.data?.error);
-      });
-    return NextResponse.json({ success: true, data });
+    if (!query) {
+      return NextResponse.json(
+        { success: false, error: "Query is required" },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch("http://localhost:8000/api/v1/core/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const responseData = await response.json();
+
+    return NextResponse.json({ 
+      success: true, 
+      data: responseData 
+    });
+
   } catch (error) {
+    console.error("API Error:", error);
     return NextResponse.json(
-      { success: false, error: "Invalid request body" },
-      { status: 400 }
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }
