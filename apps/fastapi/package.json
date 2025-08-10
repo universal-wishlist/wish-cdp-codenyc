@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "uv run celery -A app.celery worker --loglevel=info & uv run uvicorn app.main:app --reload --port 8000 --host 0.0.0.0 --loop asyncio",
+    "dev": "uv run celery -A app.celery.celery worker --loglevel=info & uv run uvicorn app.main:app --reload --port 8000 --host 0.0.0.0 --loop asyncio",
     "build": "echo 'FastAPI build completed'",
-    "start": "uv run celery -A app.celery worker --loglevel=info & uv run uvicorn app.main:app --port 8000 --host 0.0.0.0 --loop asyncio",
+    "start": "uv run celery -A app.celery.celery worker --loglevel=info & uv run uvicorn app.main:app --port 8000 --host 0.0.0.0 --loop asyncio",
     "test": "uv run pytest",
     "lint": "uv run ruff check .",
     "format": "uv run ruff format ."

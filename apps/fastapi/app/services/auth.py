@@ -9,7 +9,7 @@ from typing import Optional
 
 from fastapi import HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from supabase.client import User
+from gotrue.types import User
 
 logger = logging.getLogger(__name__)
 

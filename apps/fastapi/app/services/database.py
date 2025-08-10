@@ -8,7 +8,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from supabase import create_client, Client
-from supabase.client import User
+from gotrue.types import User
 
 from app.core.config import settings
 from app.core.utils.url_validator import validate_image_url_sync

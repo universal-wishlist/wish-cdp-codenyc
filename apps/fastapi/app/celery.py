@@ -20,12 +20,15 @@ from app.core.utils.html_cleaner import clean_html_for_llm, extract_product_imag
 logger = logging.getLogger(__name__)
 
 # Configure Celery application
-app = Celery(
+celery = Celery(
     __name__, 
     broker=settings.REDIS_URL, 
     backend=settings.REDIS_URL,
     include=['app.celery']
 )
+
+# Alias for compatibility
+app = celery
 
 # Configure Celery settings
 app.conf.update(

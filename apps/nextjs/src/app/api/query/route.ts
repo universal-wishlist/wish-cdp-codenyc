@@ -52,7 +52,7 @@ async function getCdpAccount() {
       name: "retail-x402-buyer",
     });
 
-    console.log(`CDP account initialized: ${account.id}`);
+    console.log(`CDP account initialized: ${account.address}`);
     return account;
   } catch (error) {
     console.error("Failed to initialize CDP account:", error);

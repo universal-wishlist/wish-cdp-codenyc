@@ -10,6 +10,7 @@
 
 import { useState, FormEvent } from "react";
 import { Logo } from "../components/logo";
+import { AnalyticsDashboard } from "../components/analytics-dashboard";
 
 // Types for component state
 interface QueryResponse {
@@ -209,6 +210,13 @@ export default function Home() {
             </div>
           )}
         </main>
+
+        {/* Analytics Dashboard */}
+        <section className="mt-12">
+          <div className="bg-white rounded-lg p-6">
+            <AnalyticsDashboard />
+          </div>
+        </section>
       </div>
     </div>
   );
