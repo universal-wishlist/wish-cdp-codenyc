@@ -48,7 +48,7 @@ async def fiat_onramp(request: Request, payload: OnrampPayload):
             
             if response.status_code == 200:
                 coinbase_data = response.json()
-                return f"https://pay.coinbase.com/buy/select-asset?sessionToken={coinbase_data['token']}&defaultNetwork=base&presetFiatAmount=100"
+                return f"https://pay.coinbase.com/buy/select-asset?sessionToken={coinbase_data['token']}&defaultNetwork=base&presetFiatAmount=10"
             else:
                 print(f"Coinbase API error: {response.status_code} - {response.text}")
                 return {

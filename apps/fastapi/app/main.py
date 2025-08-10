@@ -42,18 +42,30 @@ app.middleware("http")(
         price="$0.001",
         network="base-sepolia",
         pay_to_address=settings.WISH_WALLET,
-        description="Query Wish for consumer data",
+        description="Query Wish for ecommerce product insights",
         input_schema={
             "type": "object",
             "properties": {
-                "location": {"type": "string", "description": "City name"}
-            }
+                "query": {"type": "string", "description": "Product search query or question"}
+            },
+            "required": ["query"]
         },
         output_schema={
             "type": "object",
             "properties": {
-                "weather": {"type": "string"},
-                "temperature": {"type": "number"}
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "price": {"type": "number"},
+                            "rating": {"type": "number"},
+                            "availability": {"type": "string"}
+                        }
+                    }
+                },
+                "insights": {"type": "string", "description": "Market insights and recommendations"}
             }
         }
     )
@@ -68,9 +80,25 @@ async def get_query(request: Request):
     data = await request.json()
     print(data)
     return {
-        "report": {
-            "weather": "sunny",
-            "temperature": 70,
+        "wishlistInsights": {
+            "totalWishlistAdds": 12847,
+            "averageDaysOnWishlist": 18.4,
+            "conversionFromWishlist": 14.2,
+            "priceWillingness": {
+                "currentPrice": 349,
+                "averageWishlistPricePoint": 287,
+                "priceDropThreshold": 299
+            },
+            "competitorBenchmark": {
+                "yourPosition": "23% above market average",
+                "optimalDiscountToMatch": "18%",
+                "projectedSalesLift": "280%"
+            },
+            "urgencySignals": {
+                "removeFromWishlistRate": 8.3,
+                "purchaseElsewhere": 31.7,
+                "waitingForDiscount": 67.1
+            }
         }
     }
 
