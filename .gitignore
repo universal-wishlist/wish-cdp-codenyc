@@ -19,6 +19,10 @@ coverage
 # Vercel
 .vercel
 
+# plasmo
+*.plasmo
+.plasmo/
+
 # Build Outputs
 .next/
 out/
