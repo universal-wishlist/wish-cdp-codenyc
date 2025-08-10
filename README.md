@@ -14,14 +14,16 @@
 ### 🎯 The Problem We Solve
 
 Where do your future purchases hide before you're ready to buy?
+
 - 📷 **Camera rolls** filled with product screenshots
-- 📝 **Phone notes** with random product links  
+- 📝 **Phone notes** with random product links
 - 🛒 **Abandoned shopping carts** across multiple sites
 - 🤷‍♀️ **Lost opportunities** when prices drop or items go on sale
 
 ### 💡 How Wish Works
 
 **For Consumers:**
+
 1. 🔗 **One-click adding** - Click the Wish button on any product page
 2. 💰 **Embedded wallets** - Sign in with Coinbase using just your email and OTP
 3. 🛒 **In-extension purchases** - Buy directly from the Chrome extension
@@ -29,6 +31,7 @@ Where do your future purchases hide before you're ready to buy?
 5. 📊 **Smart organization** - Automatic categorization and deal tracking
 
 **For Retailers:**
+
 1. 📈 **Query insights** - Access wishlist data across all products using x402 micropayments
 2. 💡 **Smart pricing** - Get average days on wishlist, price willingness data
 3. 🎯 **Better targeting** - Understand demand signals before customers buy
@@ -200,12 +203,12 @@ const response = await fetchWithPayment("/api/query", {
 
 - **🎯 One-Click Adding**: Simply click the Wish button on any product page
 - **🔐 Embedded Wallets**: Sign in with just your email + Coinbase OTP
-- **💳 Onramp Integration**: Top up your wallet directly in the extension  
+- **💳 Onramp Integration**: Top up your wallet directly in the extension
 - **🛒 Direct Purchases**: Buy products without leaving the extension
 - **📱 Client-Side Processing**: Extract HTML directly from pages - completely unobstructed
 - **🌍 Universal Compatibility**: Works across all major e-commerce sites
 
-### 📊 Smart Wishlist Intelligence  
+### 📊 Smart Wishlist Intelligence
 
 - **📈 Average Days on Wishlist**: Track how long items stay in demand
 - **💰 Price Willingness Data**: Understand optimal pricing points
@@ -224,7 +227,7 @@ const response = await fetchWithPayment("/api/query", {
 
 - **🎯 Product Performance**: Query specific products across all wishlists
 - **📊 Demand Insights**: Real-time data on consumer interest
-- **💡 Pricing Optimization**: Data-driven discount and pricing strategies  
+- **💡 Pricing Optimization**: Data-driven discount and pricing strategies
 - **🔄 Intent Conversion**: Turn wishlist interest into actual sales
 
 ## 🔍 API Endpoints
@@ -236,6 +239,7 @@ const response = await fetchWithPayment("/api/query", {
 **Example Query:** "Patagonia cardigan performance insights"
 
 **Response:**
+
 ```json
 {
   "wishlistInsights": {
@@ -248,7 +252,7 @@ const response = await fetchWithPayment("/api/query", {
       "priceDropThreshold": 299
     },
     "competitorBenchmark": {
-      "yourPosition": "23% above market average", 
+      "yourPosition": "23% above market average",
       "optimalDiscountToMatch": "18%",
       "projectedSalesLift": "280%"
     },
@@ -382,6 +386,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🌟 Built with ❤️ for the future of e-commerce intelligence**
 
-[Demo](https://your-demo-link.com)
+[Demo](https://youtu.be/ADvBemUthYo)
 
 </div>
